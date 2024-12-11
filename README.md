@@ -9,6 +9,8 @@ Zadanie na potrzeby zajęć z programowania I
 
 Uwaga: zadanie zostało pożyczone z OIJ, czyli Olimpiady Informatycznej Juniorów (https://oij.edu.pl/zbior_zadan/etap1/).
 
+[Treść zadania (PDF)](https://github.com/oleklamza/domek/tree/main/domzad.pdf) 
+
 ## Etapy realizacji
 Program powstaje etapami. Każdy etap ma swoją odrębną gałąź.
 
