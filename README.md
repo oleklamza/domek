@@ -20,4 +20,10 @@ Wyświetlanie danych wejściowych pobieranych ze standardowego wejścia; należy
 [etap-2](https://github.com/oleklamza/domek/tree/etap-2)
 Zgodnie z opisem zadania: odczytanie z pierwszego wiersza wartości N i M (liczby wierszy i kolumn obrazka). Odczytanie w pętli N wierszy (nie ma potrzeby obsługiwania wyjścia poza plik: `EOFError` z pierwszego etapu).
 
-Dodatkowo dla zainteresowanych: prosty przykład wykorzystania _list comprehension_, _generator expression_ i _map_.  
+Dodatkowo dla zainteresowanych: prosty przykład wykorzystania _list comprehension_, _generator expression_ i _map_.
+
+[etap-3](https://github.com/oleklamza/domek/tree/etap-3)
+Przekształcamy obrazek odczytany z wejścia (pliku tekstowego) na postać
+wewnętrzną wygodną do przetwarzania: tablicę dwuwymiarową (a raczej, w przypadku
+Pythona, listę dwuwymiarową, czyli listę list).
+Od razu piszemy kod przekształcający postać wewnętrzną z powrotem na obrazek. 
