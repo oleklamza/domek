@@ -1,34 +1,43 @@
-# >>> odczytujemy pierwszy wiersz wejścia: wartości N i M
+# Odczytujemy pierwszy wiersz wejścia: wartości N i M
 line = input()
-
-nm = line.split() # dzielimy na spacji (i innych białych znakach) 
-n = int(nm[0])    # zamieniamy z tekstu (stringa) na liczby całkowite
-m = int(nm[1])    # ...
-
-## to samo ^^^ można zrobić za pomocą tzw. list comprehension
-## (https://peps.python.org/pep-0202/, https://realpython.com/list-comprehension-python/)
-# n, m = [int(x) for x in line.split()]
-
-## albo generator expression (https://peps.python.org/pep-0289/,
-## https://realpython.com/introduction-to-python-generators/):
-# n, m = (int(x) for x in line.split())
-
-## albo mapowania (np.: https://realpython.com/python-map-function/):
-# n, m = map(int, line.split())
+n, m = map(int, line.split())
 
 
-# >>> iterujemy n razy; w każdej iteracji czytamy z wejścia i wyświetlamy
-i = 0
-while i < n:
-	line = input()
-	print(line)
-	# print(i, line) # możemy też wyświetlić sobie numer linii
-	i += 1
+# Iterujemy n razy; w każdej iteracji czytamy z wejścia jeden wiersz
+# i dodajemy go do listy wierszy (rows)
+rows = []
+for i in range(n):
+	line = input() # czytamy z wejścia pojedynczy wiersz
+	line_as_list = list(line) # rozbijamy wiersz na listę pojedynczych znaków
+	rows.append(line_as_list) # dołączamy do listy wierszy
 
-## to samo ^^^ można zapisać zgrabniej za pomocą instrukcji for
+## Oczywiście powyższą pętlę można zapisać zwięźlej:
+# rows = []
 # for i in range(n):
 # 	line = input()
-# 	print(line)
+# 	rows.append(list(line))
 
-## w sytuacjach, gdy w kodzie pętli for nie wykorzystujemy zmiennej licznika,
-## można nadać jej nazwę _ (znak podłogi), czyli: for _ in range...
+## Albo nawet tak:
+# rows = []
+# for i in range(n):
+# 	rows.append(list(input()))
+
+## Uwaga: przy wyborze stopnia skumulowania kodu zawsze bierzcie pod uwagę
+## jego czytelność. Ostatnia postać omawianej pętli jest przykładem pójścia
+## o jeden krok za daleko, z kolei pierwsza postać jest raczej zbyt rozwlekła.
+
+
+## Sprawdźcie, jak wyglądają dane (obrazek) w przetworzonej postaci,
+## czyli listy list: [ [...], [...], ...]
+# print(rows)
+
+
+# Przetwarzanie (opadaniem śnieżynek zajmiemy się w kolejnym etapie)
+...
+
+
+# Składamy dane z powrotem do postaci obrazka i wyświetlamy
+for i in range(n):
+	# join() łączy elementy z listy rows[i] w jeden łańcuch znaków
+	line = ''.join(rows[i]) 
+	print(line)
