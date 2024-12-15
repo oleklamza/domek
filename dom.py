@@ -15,149 +15,67 @@ for i in range(n):
 	rows.append(list(line))
 
 """
-Opadanie śnieżynek -- optymalizacje
-Na potrzeby sprawdzania optymalizacji wprowadziłem roboczo zmienną cnt
-zliczającą wykonania wewnętrznej pętli.
-Przykładowe wyniki dla podstawowej wersji kodu:
-- dla pliku dom0a.in jest to 10830,
-- dla pliku dom10c.in jest to 997002999. 
+Opadanie śnieżynek -- nowy algorytm
+
+W poprzednim etapie omówiliśmy optymalizacje zaproponowanego na początku
+algorytmu, w którego centrum znajdowała się pętla wyznaczająca położenie
+śnieżynek jak w animacji "klatka po klatce". Z tego względu cały proces,
+dla każdej kolumny obrazka oddzielnie, musi być powtarzany wiele razy
+(maksymalnie N-1). Zbudowaliśmy więc algorytm o złożoności obliczeniowej
+sześciennej O(n^3), czego efektem są stosunkowo długie i -- tak naprawdę --
+nieakceptowalne czasy wykonywania: dla testowego obrazka dom10c.in jest
+to ok. 80 sekund bez optymalizacji i ok. 20 sekund po optymalizacji.
+Więcej z tego algorytmu wydusić się nie da.
+
+Wróćmy zatem na początek i przemyślmy to jeszcze raz.
+
+Na pewno zostaniemy przy założeniu, że przetwarzamy każdą kolumnę osobno.
+Wynika to z budowy danych i zasad przedstawionych w zadaniu. Skupiamy się
+więc na gwiazdkach-śnieżynkach w kolumnie. Poprzednio szliśmy od dołu, żeby
+"robić miejsce" dla opadających śnieżynek. A może jednak spróbowalibyśmy
+iść od góry? Widzę to tak: czytam pole i -- jeżeli jest to gwiazdka --
+chowam ją do kieszeni (zwiększam "licznik śnieżynek"), a następnie czyszczę
+pole (wstawiam kropkę). Schodzę piętro niżej i działam tak samo.
+Kluczowe jest tu natrafienie na #. Jeżeli do tego dojdzie (a kiedyś musi),
+wyciągam z kieszeni wszystkie zebrane śnieżynki i układam je jedna nad drugą,
+tworząc stos o wysokości wynikającej z licznika śnieżynek.
+W ten sposób przetwarzam kolumnę, aż znajdę się na dole (z zadania wiem, że
+w ostatnim wierszu na pewno jest #). Wszystkie śnieżynki są już na swoich
+docelowych miejscach, nie ma potrzeby ponawiania procesu (jak było w poprzednim
+rozwiązaniu). To samo powtarzam dla każdej kolumny i gotowe!
 """
-cnt = 0
 
-"""
-Jak korzystać z tego opracowania?
-Wydzieliłem trzy sekcje z omówieniem kolejnych optymalizacji oraz ich
-analizą. Proponuję zapoznać się z nimi po kolei.
-Aby aktywować daną optymalizację, przypiszcie jej numer do poniższej
-zmiennej `OPTI`:
-"""
-OPTI = 1
-
-"""
-# Optymalizacja 1
-
-Pierwsza optymalizacja polega na (potencjalnym) zmniejszeniu liczby
-iteracji zewnętrznej pętli. Nie wykonujemy jej n-1 razy, ale do momentu,
-kiedy jest to potrzebne. Skąd wiedzieć kiedy przestać? Wtedy, kiedy nie ma
-już nic do zmiany. Przyda nam się do tego zmienna logiczna `changed`.
-Zoptymalizowany kod znajdziecie poniżej.
-
-Efekty? Dla wspomnianych powyżej plików uzyskujemy wyniki:
-- dom0a.in -> cnt = 10260 (różnica 570, co stanowi ~5% mniej iteracji)
-- dom10c.in -> cnt = 987022989 (różnica 9980010, czyli ~1% mniej...)
-
-Choć wydawało się, że to dobry pomysł, optymalizacja nie przyniosła 
-wymiernych korzyści.
-"""
-if OPTI == 1:
-	...
-	while True:
-		changed = False
-		for c in range(m):
-			for r in range(n-2, -1, -1):
-				cnt += 1
-				if rows[r][c] == '*' and rows[r+1][c] == '.':
-					rows[r+1][c] = '*'
-					rows[r][c] = '.'
-					changed = True
-
-		if not changed:
-			break
-	...
+for c in range(m):
+	sf_cnt = 0
+	for r in range(n):
+		if rows[r][c] == '*':
+			rows[r][c] = '.'
+			sf_cnt += 1
+		elif rows[r][c] == '#':
+			for i in range(sf_cnt):
+				rows[r-i-1][c] = '*'
+			sf_cnt = 0
 
 """
-Ale chwila... Idea jest przecież słuszna -- przerywamy, kiedy śnieżynki dolecą
-na dół. Problem w tym, że w powyższej implementacji **globalnie** ustalamy
-konieczność powtórzenia, a w algorytmie każda kolumna jest rozpatrywana
-niezależnie od innych. Czas na kolejną optymalizację...
+Wygląda to całkiem zgrabnie. Zwróćcie uwagę na pętle: są dwie główne. Pierwsza
+idzie po kolumnach, druga po wierszach. Jej wnętrze zostanie wykonane N*M razy,
+czyli mamy złożoność kwadratową. Do tego dochodzi pętla ustawiająca stosik
+zebranych śnieżynek.
+Jakie wyniki?
+Skupimy się na czasie przetwarzania dwóch plików:
+- dom0a.in: ok. 0.3 milisekundy
+- dom10c.in: ok. 0.2 sekundy
+Uzyskujemy wyniki ok. 100 razy lepsze niż w zoptymalizowanej wersji poprzedniego
+algorytmu!
 
-# Optymalizacja 2
-
-Wprowadźmy modyfikację, w której konieczność powtórzenia ustalamy na poziomie
-pojedynczej kolumny (kod poniżej).
-Jakie wyniki? Względem wersji podstawowej mamy:
-- dom0a.in -> cnt = 3021, czyli 72% mniej iteracji,
-- dom10c.in -> cnt = 305761932, czyli 69% mniej!
-To już coś! 
+Czas na wnioski.
+Naprawdę dużo zależy od algorytmu. Warto poświęcić chwilę na przemyślenie
+sprawy, kilkukrotne przeczytanie "na nowo" wytycznych, tak żeby nie skupić
+się na jednym rozwiązaniu, ale móc wybierać z kilku.
+Cenne jest myślenie o optymalizacji implementowanych algorytmów, ale trzeba
+mieć cały czas w głowie słowa Donalda Knutha o przedwczesnej optymalizacji.
 """
-if OPTI == 2:
-	...
-	for c in range(m):
-		while True:
-			changed = False
-			for r in range(n-2, -1, -1):
-				cnt += 1
-				if rows[r][c] == '*' and rows[r+1][c] == '.':
-					rows[r+1][c] = '*'
-					rows[r][c] = '.'
-					changed = True
 
-			if not changed:
-				break
-	...
-
-"""
-Co jeszcze można by tu przyspieszyć?
-Jeszcze raz wróćmy do początku: naszym zadaniem jest doprowadzenie śnieżynek
-na dół. Czyli lecą od góry do dołu. Z kolei my, w kodzie, każdą kolumnę
-przetwarzamy, idąc od dołu do góry. Wniosek: wiemy, gdzie (na jakiej wysokości)
-pojawiła się ostatnia (najwyżej położona) śnieżynka. Powinniśmy więc zatrzymać
-"marsz ku górze" na tej właśnie pozycji, a nie niepotrzebnie iść dalej.
-
-# Optymalizacja 3
-
-Wprowadzamy zmienną `r_top`, która będzie przechowywała numer wiersza, w którym
-doszło do ostatniej zmiany. W kolejnym powtórzeniu pętli `for r` dojdziemy
-tylko do tej wartości. Kod znajdziecie poniżej, a teraz wyniki (względem
-wersji podstawowej):
-- dom0a.in -> cnt = 1830 zamiast 10830 (Popatrzcie na podobieństwo liczb.
-  To znak! ;), czyli 83% mniej,
-- dom10c.in -> cnt = 305761932 zamiast 997002999, czyli 84% mniej iteracji!
-"""
-if OPTI == 3:
-	...
-	for c in range(m):
-		r_top = -1
-		while True:
-			changed = False
-			for r in range(n-2, r_top, -1):
-				cnt += 1
-				if rows[r][c] == '*' and rows[r+1][c] == '.':
-					rows[r+1][c] = '*'
-					rows[r][c] = '.'
-					changed = True
-					r_top = r
-			
-			if not changed:
-				break
-	...
-
-"""
-Na koniec warto wspomnieć o jednej, **bardzo** istotnej sprawie.
-Optymalizacje, które tu przedstawiłem, były efektem typowej pracy nad kodem.
-Zwykle działamy tak: piszemy kod, który "jakoś tam" działa. Później staramy
-się go ulepszyć. Testujemy, sprawdzamy, jak sobie radzi w różnych sytuacjach,
-jak reaguje na zwiększenie rozmiaru danych wejściowych itp.
-Warto jednak pamiętać o istotnej myśli, którą wyraził Donald Knuth:
-
-"Premature optimization is the root of all evil".
-
-Na potrzeby tych rozważań uprośćmy sprawę do stwierdzenia:
-
-"Jeżeli nie musimy, nie optymalizujmy".
-
-(Zachęcam do poszukania głębiej. Dobry punkt startowy:
-https://wiki.c2.com/?PrematureOptimization)
-
-Czy tu musieliśmy? W opisie zadania z zawodów OIJ możemy przeczytać, że
-limit czasu na wykonanie tego programu to 2 sekundy przy maksymalnym rozmiarze
-obrazka 1000x1000. W pierwszej implementacji mieliśmy ok. 80 sekund, a po
-optymalizacjach udało się uzyskać wynik ok. 20 sekund.
-Jest lepiej i -- moim zdaniem -- było warto, ale to wciąż za słabo.
-
-Zainteresowanych rozwiązaniem tego problemu zachęcam do zajrzenia do ostatniego
-etapu, który znajduje się w gałęzi _etap-dodatkowy_.
-"""
 
 # Składamy dane z powrotem do postaci obrazka i wyświetlamy
 for i in range(n):
@@ -165,6 +83,5 @@ for i in range(n):
 	print(line)
 
 
-# Wyświetlenie czasu realizacji zadania i liczby wykonań instrukcji if
+# Wyświetlenie czasu realizacji zadania
 print(time() - t0)
-print(cnt)
